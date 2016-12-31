@@ -1,8 +1,39 @@
+var day = new Date(Date.now());
+var days = JSON.parse(localStorage.days);
+
 window.onload = function(){
     //proof of concept that graphs work in stats view
+    buildGraph();
+    setButtons();
+    var ystButton = document.getElementById("yesterday-button");
+    var tmrButton = document.getElementById("tomorrow-button");
+    ystButton.onclick =  function(){
+        day.setDate(day.getDate()-1);
+        buildGraph();
+    }
+    tmrButton.onclick =  function(){
+        day.setDate(day.getDate()+1);
+        buildGraph();
+    }
+}
+
+function setButtons(){
+    var ystButton = document.getElementById("yesterday-button");
+    var tmrButton = document.getElementById("tomorrow-button");
+    var dayHold = day;
+    dayHold.setDate(day.getDate()+1);
+    if(!days[dayHold]){
+        tmrButton.disabled = true;
+    }
+    dayHold.setDate(day.getDate()-1);
+    if(!days[dayHold]){
+        ystButton.disabled = true;
+    }
+}
+
+function buildGraph(){
     var ctx = document.getElementById("myChart");
-    var today = new Date(Date.now())
-    var siteTimes = JSON.parse(localStorage.days)[today.yyyymmdd()];
+    var siteTimes = days[day.yyyymmdd()];
     if(Object.keys(siteTimes).length > 0){
         //top ten then rest
         var timesArray = [];
