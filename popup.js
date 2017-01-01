@@ -7,7 +7,7 @@ function yyyymmdd(date) {
           (dd>9 ? '' : '0') + dd
          ].join('');
 };
-var timesJSON;
+var daysSites;
 window.onload = function(){
 	var urlHold = localStorage.currentURL
 	stopTimer();
@@ -16,23 +16,23 @@ window.onload = function(){
 	document.getElementById('open-stats-button').onclick = function(){
 		chrome.tabs.create({ url: chrome.extension.getURL('stats.html')});
 	}
-	timesJSON = JSON.parse(localStorage.days)[yyyymmdd(new Date(Date.now()))];
+	daysSites = JSON.parse(localStorage[yyyymmdd(new Date(Date.now()))]);
 	drawTable();
 	window.setInterval(tick, 1000);
 }
 
 function tick(){
-	if(timesJSON){
+	if(daysSites){
 		drawTable();
-		timesJSON[localStorage.currentURL] += 1000;
+		daysSites[localStorage.currentURL] += 1000;
 	}
 }
 
 function drawTable(){
 	document.getElementById('times-div').innerHTML = "";
 	var timesArray = [];
-	for (var site in timesJSON) {
-		timesArray.push({'url':site,'time':(timesJSON[site]/1000)});
+	for (var site in daysSites) {
+		timesArray.push({'url':site,'time':(daysSites[site]/1000)});
 	}
 	var top10 = timesArray.sort(function(a, b) { return a.time < b.time ? 1 : -1; })
                 .slice(0, 10);

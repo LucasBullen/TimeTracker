@@ -98,20 +98,17 @@ function addTime(startStamp, endStamp, url){
 		startDate = startDate.setDate(startDate.getDate()+1);//start is next day
 	}
 
-	if(!localStorage.days){
-		localStorage.days = "{}";
-	}
-	var days = JSON.parse(localStorage.days);
 	var dateString = startDate.yyyymmdd();
+	if(!localStorage[dateString]){
+		localStorage[dateString] = "{}";
+	}
+	var daySites = JSON.parse(localStorage[dateString]);
 
-	if(!days[dateString]){
-		days[dateString] = {};
+	if(!daySites[url]){
+		daySites[url] = 0;
 	}
-	if(!days[dateString][url]){
-		days[dateString][url] = 0;
-	}
-	days[dateString][url] = parseInt(days[dateString][url]) + (endStamp - startStamp);
-	localStorage.days = JSON.stringify(days);
+	daySites[url] = parseInt(daySites[url]) + (endStamp - startStamp);
+	localStorage[dateString] = JSON.stringify(daySites);
 	console.log(localStorage);
 }
 
@@ -127,6 +124,7 @@ Date.prototype.yyyymmdd = function() {
 
 
 function reset(){
+	localStorage.clear();
 	chrome.storage.local.clear();
 }
 

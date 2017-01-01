@@ -1,5 +1,7 @@
 var day = new Date(Date.now());
-var days = JSON.parse(localStorage.days);
+var daySites = {};
+if(localStorage[day.yyyymmdd()])
+    daySites = JSON.parse(localStorage[day.yyyymmdd()]);
 var chart;
 
 window.onload = function(){
@@ -10,11 +12,17 @@ window.onload = function(){
     var tmrButton = document.getElementById("tomorrow-button");
     ystButton.onclick =  function(){
         day.setDate(day.getDate()-1);
+        daySites = {};
+        if(localStorage[day.yyyymmdd()])
+            daySites = JSON.parse(localStorage[day.yyyymmdd()]);
         setButtons();
         buildGraph();
     }
     tmrButton.onclick =  function(){
         day.setDate(day.getDate()+1);
+        daySites = {};
+        if(localStorage[day.yyyymmdd()])
+            daySites = JSON.parse(localStorage[day.yyyymmdd()]);
         setButtons();
         buildGraph();
     }
@@ -27,7 +35,7 @@ function setButtons(){
 
     dayHold.setDate(day.getDate()+1);
     tmrButton.innerHTML = dayHold.toISOString().substring(0, 10);
-    if(!days[dayHold.yyyymmdd()]){
+    if(!localStorage[dayHold.yyyymmdd()]){
         tmrButton.disabled = true;
     }else{
         tmrButton.disabled = false;
@@ -35,7 +43,7 @@ function setButtons(){
 
     dayHold.setDate(day.getDate()-1);
     ystButton.innerHTML = dayHold.toISOString().substring(0, 10);
-    if(!days[dayHold.yyyymmdd()]){
+    if(!localStorage[dayHold.yyyymmdd()]){
         ystButton.disabled = true;
     }else{
         ystButton.disabled = false;
@@ -46,56 +54,58 @@ function buildGraph(){
     if(chart)
         chart.destroy();
     var ctx = document.getElementById("myChart");
-    var siteTimes = days[day.yyyymmdd()];
-    if(Object.keys(siteTimes).length > 0){
+    var top10 = [];
+    if(Object.keys(daySites).length > 0){
         //top ten then rest
         var timesArray = [];
-        for (var site in siteTimes) {
-            timesArray.push({'url':site,'time':(siteTimes[site]/1000)});
+        for (var site in daySites) {
+            timesArray.push({'url':site,'time':(daySites[site]/1000)});
         }
         timesArray = timesArray.sort(function(a, b) { return a.time < b.time ? 1 : -1; })
-        var top10 = timesArray.slice(0, 10);
+        top10 = timesArray.slice(0, 10);
 
         timeSum = 0;
         for (var i = 9; i < timesArray.length; i++) {
             timeSum += timesArray[i].time;
         }
-
-        top10.push({'url':'Other','time':timeSum});
-        var max = top10[0].time;
-        var timeLabels = [];
-        var timeData = [];
-        var timeBackgroundColor = [];
-        var timeBorderColor = [];
-        for (var i = 0; i < top10.length; i++) {
-            top10[i]
-            timeLabels.push(top10[i].url);
-            timeData.push((Math.floor(parseInt(top10[i].time))/60).toFixed(2));
-            var colour = Math.floor(((top10[i].time/max)*255));
-            timeBackgroundColor.push('rgba('+ colour +', 0, 0, 0.2)');
-            timeBorderColor.push('rgba('+ colour +', 0, 0, 1)');
-        }
-        chart = new Chart(ctx, {
-            type: 'bar',
-            data: {
-                labels: timeLabels,//top X sites & other
-                datasets: [{
-                    label: 'Time Spent on '+day.toISOString().substring(0, 10),
-                    data: timeData,//time (in mins)(so /60)
-                    backgroundColor: timeBackgroundColor,
-                    borderColor: timeBorderColor,
-                    borderWidth: 1
-                }]
-            },
-            options: {
-                scales: {
-                    yAxes: [{
-                        ticks: {
-                            beginAtZero:true
-                        }
-                    }]
-                }
-            }
-        });
+        if(timeSum > 0)
+            top10.push({'url':'Other','time':timeSum});
     }
+    var max = 0;
+    if(top10[0])
+        max = top10[0].time;
+    var timeLabels = [];
+    var timeData = [];
+    var timeBackgroundColor = [];
+    var timeBorderColor = [];
+    for (var i = 0; i < top10.length; i++) {
+        top10[i]
+        timeLabels.push(top10[i].url);
+        timeData.push((Math.floor(parseInt(top10[i].time))/60).toFixed(2));
+        var colour = Math.floor(((top10[i].time/max)*255));
+        timeBackgroundColor.push('rgba('+ colour +', 0, 0, 0.2)');
+        timeBorderColor.push('rgba('+ colour +', 0, 0, 1)');
+    }
+    chart = new Chart(ctx, {
+        type: 'bar',
+        data: {
+            labels: timeLabels,//top X sites & other
+            datasets: [{
+                label: 'Time Spent on '+day.toISOString().substring(0, 10),
+                data: timeData,//time (in mins)(so /60)
+                backgroundColor: timeBackgroundColor,
+                borderColor: timeBorderColor,
+                borderWidth: 1
+            }]
+        },
+        options: {
+            scales: {
+                yAxes: [{
+                    ticks: {
+                        beginAtZero:true
+                    }
+                }]
+            }
+        }
+    });
 }
