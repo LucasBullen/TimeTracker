@@ -24,7 +24,8 @@ window.onload = function(){
 function tick(){
 	if(daysSites){
 		drawTable();
-		daysSites[localStorage.currentURL] += 1000;
+		if(localStorage.currentURL != "null")
+			daysSites[localStorage.currentURL] += 1000;
 	}
 }
 
