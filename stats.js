@@ -1,5 +1,6 @@
 var day = new Date(Date.now());
 var days = JSON.parse(localStorage.days);
+var chart;
 
 window.onload = function(){
     //proof of concept that graphs work in stats view
@@ -9,10 +10,12 @@ window.onload = function(){
     var tmrButton = document.getElementById("tomorrow-button");
     ystButton.onclick =  function(){
         day.setDate(day.getDate()-1);
+        setButtons();
         buildGraph();
     }
     tmrButton.onclick =  function(){
         day.setDate(day.getDate()+1);
+        setButtons();
         buildGraph();
     }
 }
@@ -20,18 +23,28 @@ window.onload = function(){
 function setButtons(){
     var ystButton = document.getElementById("yesterday-button");
     var tmrButton = document.getElementById("tomorrow-button");
-    var dayHold = day;
+    var dayHold = new Date(day);
+
     dayHold.setDate(day.getDate()+1);
-    if(!days[dayHold]){
+    tmrButton.innerHTML = dayHold.toISOString().substring(0, 10);
+    if(!days[dayHold.yyyymmdd()]){
         tmrButton.disabled = true;
+    }else{
+        tmrButton.disabled = false;
     }
+
     dayHold.setDate(day.getDate()-1);
-    if(!days[dayHold]){
+    ystButton.innerHTML = dayHold.toISOString().substring(0, 10);
+    if(!days[dayHold.yyyymmdd()]){
         ystButton.disabled = true;
+    }else{
+        ystButton.disabled = false;
     }
 }
 
 function buildGraph(){
+    if(chart)
+        chart.destroy();
     var ctx = document.getElementById("myChart");
     var siteTimes = days[day.yyyymmdd()];
     if(Object.keys(siteTimes).length > 0){
@@ -62,12 +75,12 @@ function buildGraph(){
             timeBackgroundColor.push('rgba('+ colour +', 0, 0, 0.2)');
             timeBorderColor.push('rgba('+ colour +', 0, 0, 1)');
         }
-        var myChart = new Chart(ctx, {
+        chart = new Chart(ctx, {
             type: 'bar',
             data: {
                 labels: timeLabels,//top X sites & other
                 datasets: [{
-                    label: 'Time Spent Today',
+                    label: 'Time Spent on '+day.toISOString().substring(0, 10),
                     data: timeData,//time (in mins)(so /60)
                     backgroundColor: timeBackgroundColor,
                     borderColor: timeBorderColor,
