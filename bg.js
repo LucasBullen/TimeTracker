@@ -36,7 +36,7 @@ chrome.tabs.onRemoved.addListener(function(tabId, removeInfo) {
 });
 
 
-chrome.idle.setDetectionInterval(120); //seconds
+chrome.idle.setDetectionInterval(10*60); //seconds
 chrome.idle.onStateChanged.addListener(function(newState) {
 	if(newState == "active"){
 		if(localStorage.currentURL)
@@ -53,21 +53,6 @@ chrome.management.onEnabled.addListener(function(info) {
 	});
 	console.log("START URL: " + localStorage.startTime + " at: " + localStorage.currentURL);
 })
-
-function urlToHost(url){
-	var l = document.createElement("a");
-	l.href = url;
-	var protocol = l.protocol;
-	if(protocol == "http:" || protocol == "https:")
-		return l.hostname;
-	return "null";
-}
-
-function isSameDay(date1, date2){
-	return date1.getDate() == date2.getDate()
-      && date1.getMonth() == date2.getMonth()
-      && date1.getFullYear() == date2.getFullYear();
-}
 
 function startTimer(tab){
 	if(tab.status == "complete" && urlToHost(tab.url) != localStorage.currentURL){
@@ -115,22 +100,6 @@ function addTime(startStamp, endStamp, url){
 	}
 	daySites[url] = parseInt(daySites[url]) + (endStamp - startStamp);
 	localStorage[dateString] = JSON.stringify(daySites);
-}
-
-Date.prototype.yyyymmdd = function() {
-  var mm = this.getMonth() + 1; // getMonth() is zero-based
-  var dd = this.getDate();
-
-  return [this.getFullYear(),
-          (mm>9 ? '' : '0') + mm,
-          (dd>9 ? '' : '0') + dd
-         ].join('');
-};
-
-
-function reset(){
-	localStorage.clear();
-	chrome.storage.local.clear();
 }
 
 /*
