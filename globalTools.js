@@ -7,6 +7,10 @@ function urlToHost(url){
 	return "null";
 }
 
+function hostToShortString(host){
+	return host.replace(/^www\./, "");
+}
+
 function isSameDay(date1, date2){
 	return date1.getDate() == date2.getDate()
       && date1.getMonth() == date2.getMonth()

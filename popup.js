@@ -6,10 +6,12 @@ window.onload = function(){
 	document.getElementById('open-stats-button').onclick = function(){
 		chrome.tabs.create({ url: chrome.extension.getURL('stats.html')});
 	}
-	var today = new Date(Date.now())
-	daysSites = JSON.parse(localStorage[today.yyyymmdd()]);
-	drawTable();
-	window.setInterval(tick, 1000);
+	var today = new Date(Date.now());
+	if(localStorage[today.yyyymmdd()]){
+		daysSites = JSON.parse(localStorage[today.yyyymmdd()]);
+		drawTable();
+		window.setInterval(tick, 1000);
+	}
 }
 
 function tick(){

@@ -1,50 +1,47 @@
 window.onload = function(){
     //proof of concept that graphs work in stats view
-    buildGraph();
-    setButtons();
-    var ystButton = document.getElementById("back-button");
-    var tmrButton = document.getElementById("forward-button");
-    ystButton.onclick =  function(){
-    /*    day.setDate(day.getDate()-1);
-        daySites = {};
-        if(localStorage[day.yyyymmdd()])
-            daySites = JSON.parse(localStorage[day.yyyymmdd()]);
-        setButtons();
-        buildGraph();*/
-    }
-    tmrButton.onclick =  function(){
-       /* day.setDate(day.getDate()+1);
-        daySites = {};
-        if(localStorage[day.yyyymmdd()])
-            daySites = JSON.parse(localStorage[day.yyyymmdd()]);
-        setButtons();
-        buildGraph();*/
-    }
+    buildStackedColumnGraph();
+    buildPieGraph();
 }
 
-function setButtons(){
-    /*var ystButton = document.getElementById("back-button");
-    var tmrButton = document.getElementById("forward-button");
-    var dayHold = new Date(day);
-
-    dayHold.setDate(day.getDate()+1);
-    tmrButton.innerHTML = dayHold.toISOString().substring(0, 10);
-    if(!localStorage[dayHold.yyyymmdd()]){
-        tmrButton.disabled = true;
-    }else{
-        tmrButton.disabled = false;
+function buildPieGraph(){
+    var data = [];
+    var day = new Date(Date.now());
+    var dayData = {};
+    if(localStorage[day.yyyymmdd()])
+        dayData = JSON.parse(localStorage[day.yyyymmdd()]);
+    var otherTime = 0;
+    var totalTime = 0;
+    for(var site in dayData){
+        if(Object.keys(dayData).length > 7 && dayData[site]/60000 < 1){
+            otherTime +=dayData[site];
+        }else{
+            data.push({label:site, indexLabel:hostToShortString(site), y:parseFloat((dayData[site]/60000).toFixed(2))});
+        }
+        totalTime+=dayData[site];
     }
-
-    dayHold.setDate(day.getDate()-1);
-    ystButton.innerHTML = dayHold.toISOString().substring(0, 10);
-    if(!localStorage[dayHold.yyyymmdd()]){
-        ystButton.disabled = true;
-    }else{
-        ystButton.disabled = false;
-    }*/
+    if (otherTime > 0) {
+        data.push({label:"Other", indexLabel:"Other", y:parseFloat((otherTime/60000).toFixed(2))});
+    }
+    var chart = new CanvasJS.Chart("pieGraph",
+    {
+        title:{
+            text: "Today's Internet Usage: " + secondsToTimeString(totalTime/1000)
+        },
+        data: [
+        {
+            type: "pie",
+            toolTipContent: '<div><img src="https://s2.googleusercontent.com/s2/favicons?domain="{label}"'+
+                '" style="vertical-align:middle;margin:2px;"/><span style="vertical-align:middle;">'+
+                '{indexLabel}: {y} mins</span></div>',
+            legendText: "{indexLabel}",
+            dataPoints: data
+        }]
+    });
+    chart.render();
 }
 
-function buildGraph(){
+function buildStackedColumnGraph(){
     var siteWeekData = {}
     var day = new Date(Date.now());
     for (var i = 0; i < 7; i++) {
@@ -76,18 +73,17 @@ function buildGraph(){
     for(var site in siteWeekData){
         weekData.push({
             type: "stackedColumn",
-            toolTipContent:site+": {y}mins",
+            toolTipContent: '<div><img src="https://s2.googleusercontent.com/s2/favicons?domain='+
+                site+'" style="vertical-align:middle;margin:2px;"/><span style="vertical-align:middle;">'+
+                site+': {y} mins</span></div>',
             dataPoints: siteWeekData[site]
         });
     }
-    console.log(weekData);
-    console.log(day);
-    console.log(new Date(Date.now()));
-    var chart = new CanvasJS.Chart("chartContainer", {
+    var chart = new CanvasJS.Chart("stackedColumnGraph", {
         title: {
             text: "How You Spend Your Time"
         },
-        dataPointWidth: 20,
+        dataPointWidth: 40,
         axisX: {
             title: "Day"
         },
@@ -109,3 +105,4 @@ function buildWeek(day){
     }
     return weekArray.reverse();
 }
+
