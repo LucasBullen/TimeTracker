@@ -17,6 +17,17 @@ function isSameDay(date1, date2){
       && date1.getFullYear() == date2.getFullYear();
 }
 
+function getLSByDay(day){
+	if(day == 'today'){
+		day = new Date(Date.now());
+	}
+	if(localStorage[day.yyyymmdd()]){
+    	return JSON.parse(localStorage[day.yyyymmdd()]);
+    }else{
+    	return {};
+    }
+}
+
 function secondsToTimeString(seconds){
 	var sInYear = 31536000;
 	var sInDay = 86400;

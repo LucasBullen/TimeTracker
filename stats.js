@@ -2,6 +2,83 @@ window.onload = function(){
     //proof of concept that graphs work in stats view
     buildStackedColumnGraph();
     buildPieGraph();
+    buildRuleList();
+}
+
+function buildRuleHTML(URL, rule, totalTime){
+    var timeInType = 0;
+    switch(rule.budgetType){
+        case "mins":
+           timeInType = totalTime / 60000;
+            break;
+        case "hrs":
+           timeInType = totalTime / 3600000;
+            break;
+    }
+    var percent = (timeInType/rule.budget).toFixed(2);
+    timeInType = timeInType.toFixed(2);
+    return {
+            percent:percent,
+            html:"<p><b>"+URL+"</p></b>"+
+                "<p>Rule: "+rule.budget+" "+rule.budgetType+" / "+rule.length+"</p>"+
+                //"<p>Progress: "+timeInType+" / "+rule.budget+" "+rule.budgetType+"</p>"+
+                "<p>"+(percent*100).toFixed(0)+"%</p>"+
+                progressBar(percent,timeInType+" / "+rule.budget+" "+rule.budgetType)
+        };
+}
+
+function addRule(site, budget, budgetType, length){
+    if(!localStorage.rules)
+        localStorage.rules = "{}";
+    var rules = JSON.parse(localStorage.rules);
+    rules[site] = {budget:budget,budgetType:budgetType,length:length};
+    localStorage.rules = JSON.stringify(rules);
+}
+
+function buildRuleList(){
+    //get rules
+    if(localStorage.rules){
+        var rules = JSON.parse(localStorage.rules);
+        var ruleTable = document.getElementById('rulesList');
+        ruleTable.innerHTML = "";
+        var ruleHTMLs = [];
+        for(var URL in rules){
+            var totalTime = 0;
+            switch(rules[URL].length){
+                case "day":
+                    var dayData = getLSByDay('today');
+                    for(var site in dayData){
+                        if(site == URL){
+                            totalTime = dayData[site];
+                            break;
+                        }
+                    }
+                    break;
+                case "week":
+                    var day = new Date(Date.now());
+                    while(day.getDay() != 0){
+                        var dayData = getLSByDay(day);
+                        for(var site in dayData){
+                            if(site == URL){
+                                totalTime += dayData[site];
+                                break;
+                            }
+                        }
+                        day.setDate(day.getDate()-1);
+                    }
+                    break;
+            }
+            var ruleHTML = buildRuleHTML(URL, rules[URL], totalTime);
+            ruleHTMLs.push(ruleHTML);
+        }
+        ruleHTMLs.sort(function(a, b) { return a.percent < b.percent ? 1 : -1; });
+        ruleHTMLs.map(function(a){ruleTable.innerHTML+=a.html});
+        console.log(ruleHTMLs);
+        /*for(var rule in ruleHTMLs){
+            ruleTable.innerHTML+=rule.html;
+        }*/
+    }
+    //add rule
 }
 
 function buildPieGraph(){

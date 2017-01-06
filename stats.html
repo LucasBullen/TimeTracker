@@ -4,13 +4,17 @@
 	<title>Stats</title>
   	<script type="text/javascript" src="canvasjs.min.js" ></script>
   	<script type="text/javascript" src="globalTools.js" ></script>
+  	<script type="text/javascript" src="parts.js" ></script>
   	<script type="text/javascript" src="stats.js" ></script>
 </head>
 <body>
 	<div id="stackedColumnGraph" style="height: 200px; width: 100%;"></div>
 	<div style="width: 100%;">
-		<div style="float:left; width:50%;">left side</div>
-		<div id="pieGraph" style="float:right; width:50%; margin-left:10px;"></div>
+		<div id="leftSide" style="float:left; width:50%;">
+			<h2>Rules</h2>
+			<div style="overflow-y: scroll; overflow-x: hidden; padding: 10px; height:300px;" id="rulesList"></div>
+		</div>
+		<div id="pieGraph" style="float:right; width:45%; margin-left:10px;"></div>
 	</div>
 </body>
 </html>
